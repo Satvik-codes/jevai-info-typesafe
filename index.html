@@ -31,10 +31,6 @@
   .lede{margin:20px 0 0;max-width:74ch;font-size:18.5px;color:var(--ink-2);font-weight:350}
   .lede b{font-weight:600;color:var(--ink)}
 
-  .facts{margin-top:32px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px 34px}
-  .facts div span{display:block;font-size:11.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
-  .facts div strong{display:block;font-weight:600;font-size:16.5px;margin-top:4px;letter-spacing:-.01em}
-
   section{padding:32px 0;border-top:1px solid var(--line)}
   .sechead{margin-bottom:24px}
   .num{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3)}
@@ -50,6 +46,7 @@
   ul.pts.one li::before{top:8px;width:5px;height:5px}
 
   .blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .blocks.duo{grid-template-columns:1fr 1fr}
   .blk h3{font-size:21px;font-weight:700;letter-spacing:-.018em}
   .blk .sig{margin-top:5px;font-size:14px;color:var(--ink-3)}
   .blk p{margin-top:14px;color:var(--ink-2);font-size:16px}
@@ -77,10 +74,10 @@
 
   @media(max-width:1040px){
     .blocks,ul.pts{grid-template-columns:1fr 1fr}
-    .facts{grid-template-columns:repeat(2,1fr)}
+    .blocks.duo{grid-template-columns:1fr}
   }
   @media(max-width:680px){
-    .blocks,ul.pts,.facts{grid-template-columns:1fr}
+    .blocks,ul.pts{grid-template-columns:1fr}
     table.cmp thead{display:none}
     table.cmp tbody th,table.cmp td{width:auto;display:block;padding:4px 0}
     table.cmp td.j{border-left:2px solid var(--accent);padding-left:14px;margin-bottom:12px}
@@ -104,17 +101,7 @@
       answers with calibrated probabilities and confidence values that software acts on directly.
     </p>
 
-    <div class="facts">
-      <div><span>Owner</span><strong>TypeSafe AI</strong></div>
-      <div><span>Model class</span><strong>System One</strong></div>
-      <div><span>Release</span><strong>1.13.0 · 15 Sep 2026</strong></div>
-      <div><span>Model id</span><strong>jev-1.13.0</strong></div>
-      <div><span>Endpoint</span><strong>api.typesafe.ai</strong></div>
-      <div><span>Input</span><strong>Text or JSON</strong></div>
-      <div><span>Output</span><strong>JSON answers</strong></div>
-      <div><span>Output cost</span><strong>Free</strong></div>
-    </div>
-  </header>
+    </header>
 
   <!-- ══ 1 ═══════════════════════════════════ -->
   <section>
@@ -202,25 +189,24 @@
     <div class="sechead">
       <div class="num">04 — Use cases</div>
       <h2>Candidate applications</h2>
-      <p class="sub">Candidate applications, presented for assessment. None has been validated against these scenarios.</p>
+      <p class="sub">Worked examples, presented for assessment. None has been validated in production.</p>
     </div>
-    <div class="blocks">
+    <div class="blocks duo">
       <div class="blk">
-        <h3>Confidence-gated retrieval</h3>
-        <div class="sig">noul × 4</div>
-        <p>Search ranks by wording similarity, so a retrieved passage may match the query yet be irrelevant, contradictory, or carry instructions aimed at the model. Each passage is checked before it reaches the writing model; failures are dropped.</p>
+        <h3>Audience sentiment at scale</h3>
+        <div class="sig">score + choice · high-volume comment streams</div>
+        <p>A broadcaster wants the overall audience reaction to a live stream — supportive, critical, concerned — from 20,000 comments. Handing them to a language model would exhaust the token budget. Jev reads them in batches and returns a sentiment distribution per batch, which code tallies into one picture of the audience.</p>
         <ul class="pts one">
-          <li>Four binary questions per passage: relevant, contains usable evidence, contradicts the query's premise, attempts to instruct the model</li>
-          <li>Thresholds apply in fixed order — security, conflict, relevance — and the first match decides</li>
-          <li>Contradicting passages go to a separate prompt block, so the writer can flag the conflict</li>
-          <li>Re-tuning is a number change against stored answers, with no further calls</li>
-          <li>A filter, not a security boundary — the writing prompt still treats every passage as untrusted</li>
+          <li>Comments are scored in batches, with a score question per batch and the results summed in code</li>
+          <li>The full distribution per comment is retained, so a rare strong reaction is not averaged away</li>
+          <li>Cost tracks input tokens alone, making full-corpus analysis feasible where per-comment generation is not</li>
+          <li>A low-confidence batch is flagged rather than folded silently into the total</li>
         </ul>
       </div>
       <div class="blk">
-        <h3>Classification across a taxonomy</h3>
-        <div class="sig">choice × 1</div>
-        <p>Sorting is bottlenecked by ambiguous cases, which look identical to clear ones. The answer's confidence separates the two.</p>
+        <h3>Sorting reader comments into categories</h3>
+        <div class="sig">choice · hierarchical fallback</div>
+        <p>A publisher needs incoming comments sorted into a taxonomy. Ambiguous cases look identical to clear ones, which is where sorting normally stalls. The answer's confidence separates the two.</p>
         <ul class="pts one">
           <li>One choice over the full taxonomy, reliable to roughly 240 options</li>
           <li>The decision reads confidence, not the winning option's probability — a narrow lead and a scattered distribution are different situations at the same probability</li>
@@ -230,9 +216,21 @@
         </ul>
       </div>
       <div class="blk">
-        <h3>Historic-record attribution</h3>
+        <h3>Evidence filtering for a support assistant</h3>
+        <div class="sig">noul × 4 · pre-generation filtering</div>
+        <p>A support assistant retrieves internal wiki pages by keyword. A page may match the wording yet be outdated, contradict the question, or contain text aimed at the assistant. Each page is checked before it reaches the model that writes the reply.</p>
+        <ul class="pts one">
+          <li>Four binary questions per page: relevant, contains usable evidence, contradicts the question's premise, attempts to instruct the model</li>
+          <li>Thresholds apply in fixed order — security, conflict, relevance — and the first match decides</li>
+          <li>Contradicting pages go to a separate prompt block, so the reply can flag the conflict</li>
+          <li>Re-tuning is a number change against stored answers, with no further calls</li>
+          <li>A filter, not a security boundary — the writing prompt still treats every page as untrusted</li>
+        </ul>
+      </div>
+      <div class="blk">
+        <h3>Checking a name against earlier coverage</h3>
         <div class="sig">noul × N · advisory only</div>
-        <p>An editor checks whether a name in current coverage appears in earlier reporting on a similar offence. A string match cannot separate a genuine prior record from a namesake.</p>
+        <p>An editor asks whether an individual named in current coverage appears in earlier reporting on a similar offence. A string match cannot separate a genuine prior record from a namesake.</p>
         <ul class="pts one">
           <li>The state carries the two records being compared, not a full archive</li>
           <li>Each identity assertion is a separate noul: surname, locality, vehicle or role, event-type consistency</li>
