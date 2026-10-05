@@ -204,27 +204,27 @@
         </ul>
       </div>
       <div class="blk">
-        <h3>Sorting reader comments into categories</h3>
-        <div class="sig">choice · hierarchical fallback</div>
-        <p>A publisher needs incoming comments sorted into a taxonomy. Ambiguous cases look identical to clear ones, which is where sorting normally stalls. The answer's confidence separates the two.</p>
+        <h3>Filtering what a search returns</h3>
+        <div class="sig">noul × 4 · pre-generation filtering</div>
+        <p>A search assistant pulls matching documents and hands them to a language model to write an answer from. A document can match the keywords yet be outdated, contradict the question, or contain text aimed at the model. Each one is checked first.</p>
         <ul class="pts one">
-          <li>One choice over the full taxonomy, reliable to roughly 240 options</li>
-          <li>The decision reads confidence, not the winning option's probability — a narrow lead and a scattered distribution are different situations at the same probability</li>
-          <li>Below the threshold, the parent category is reported, derived in code with no second request</li>
-          <li>Below that, the item goes to human review</li>
-          <li>In TypeSafe's published example, confidence-driven fallback raised correct labels from 39 to 48 across 60 filings</li>
+          <li>Four yes/no questions per document: is it on topic, does it contain usable facts, does it contradict the question, is it trying to instruct the model</li>
+          <li>Thresholds apply in fixed order — security, conflict, relevance — and the first match decides</li>
+          <li>Documents that contradict go into a separate section of the prompt, so the answer can flag the disagreement</li>
+          <li>Re-tuning is a number change against stored answers, with no further calls</li>
+          <li>A filter, not a security boundary — the writing prompt still treats every document as untrusted</li>
         </ul>
       </div>
       <div class="blk">
-        <h3>Evidence filtering for a support assistant</h3>
-        <div class="sig">noul × 4 · pre-generation filtering</div>
-        <p>A support assistant retrieves internal wiki pages by keyword. A page may match the wording yet be outdated, contradict the question, or contain text aimed at the assistant. Each page is checked before it reaches the model that writes the reply.</p>
+        <h3>Sorting articles and comments into categories</h3>
+        <div class="sig">choice · broad label when unsure</div>
+        <p>A publisher wants incoming articles and comments sorted into a fixed set of categories. Unclear cases look identical to clear ones, which is where sorting stalls. The confidence on the answer tells the two apart.</p>
         <ul class="pts one">
-          <li>Four binary questions per page: relevant, contains usable evidence, contradicts the question's premise, attempts to instruct the model</li>
-          <li>Thresholds apply in fixed order — security, conflict, relevance — and the first match decides</li>
-          <li>Contradicting pages go to a separate prompt block, so the reply can flag the conflict</li>
-          <li>Re-tuning is a number change against stored answers, with no further calls</li>
-          <li>A filter, not a security boundary — the writing prompt still treats every page as untrusted</li>
+          <li>One question carrying every category, reliable to roughly 240 options</li>
+          <li>The decision reads confidence, not the top category's probability — a narrow lead and a scattered split are different situations at the same number</li>
+          <li>Below the threshold, the broader category is reported, worked out in code with no second request</li>
+          <li>Below that, the item goes to human review</li>
+          <li>In TypeSafe's published example, this fallback raised correct labels from 39 to 48 across 60 filings</li>
         </ul>
       </div>
       <div class="blk">
