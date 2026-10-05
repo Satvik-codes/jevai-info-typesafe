@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>typesafe/jev-1.13 — Technical Overview</title>
+<title>Jev 1.13 — TypeSafe AI System One decision model</title>
 <style>
   :root{
     --bg:#ffffff;
@@ -24,34 +24,28 @@
   }
   .wrap{width:90%;max-width:1300px;margin:0 auto}
 
-  /* ── header ─────────────────────────────── */
   header{padding:44px 0 34px}
   .eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
   h1{margin:14px 0 0;font-size:clamp(34px,3.6vw,50px);line-height:1.06;font-weight:700;letter-spacing:-.03em}
   h1 .slug{color:var(--ink-3);font-weight:400}
-  .lede{margin:20px 0 0;max-width:74ch;font-size:18.5px;color:var(--ink-2);font-weight:350}
+  .lede{margin:20px 0 0;max-width:78ch;font-size:18.5px;color:var(--ink-2);font-weight:350}
   .lede b{font-weight:600;color:var(--ink)}
 
   .facts{margin-top:34px;display:grid;grid-template-columns:repeat(4,1fr);gap:22px 34px}
-  .facts div span{
-    display:block;font-size:11.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
-  }
+  .facts div span{display:block;font-size:11.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
   .facts div strong{display:block;font-weight:600;font-size:16.5px;margin-top:4px;letter-spacing:-.01em}
 
-  /* ── sections ───────────────────────────── */
   section{padding:34px 0;border-top:1px solid var(--line)}
   .sechead{margin-bottom:26px}
   .num{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3)}
-  h2{margin-top:8px;font-size:27px;font-weight:700;letter-spacing:-.022em;line-height:1.18;max-width:30ch}
-  .sub{margin-top:11px;color:var(--ink-2);max-width:82ch;font-size:17px}
+  h2{margin-top:8px;font-size:27px;font-weight:700;letter-spacing:-.022em;line-height:1.18;max-width:32ch}
+  .sub{margin-top:11px;color:var(--ink-2);max-width:84ch;font-size:17px}
 
-  /* ── bullets: 2 columns, airy ───────────── */
   ul.pts{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:16px 46px}
   ul.pts li{position:relative;padding-left:24px;color:var(--ink-2);font-size:16.5px}
   ul.pts li::before{content:"";position:absolute;left:2px;top:10px;width:6px;height:6px;background:var(--accent);border-radius:50%}
   ul.pts li b{color:var(--ink);font-weight:650}
 
-  /* ── primitives ─────────────────────────── */
   .blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
   .blk h3{font-size:22px;font-weight:700;letter-spacing:-.018em}
   .blk .sig{margin-top:5px;font-size:14px;color:var(--ink-3)}
@@ -66,30 +60,21 @@
   pre .k{color:var(--accent);font-weight:600}
   pre .n{color:var(--ink);font-weight:600}
 
-  /* ── lifecycle ──────────────────────────── */
   .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;counter-reset:s}
   .step{counter-increment:s}
-  .step::before{
-    content:"0" counter(s);display:block;font-size:13px;font-weight:700;color:var(--accent);
-    letter-spacing:.06em;font-variant-numeric:tabular-nums;
-  }
+  .step::before{content:"0" counter(s);display:block;font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.06em;font-variant-numeric:tabular-nums}
   .step h4{margin-top:7px;font-size:17.5px;font-weight:650;letter-spacing:-.012em}
   .step p{margin-top:6px;color:var(--ink-2);font-size:15.5px}
 
-  /* ── comparison ─────────────────────────── */
   table.cmp{width:100%;border-collapse:collapse;font-size:16.5px;table-layout:fixed}
   table.cmp th,table.cmp td{text-align:left;padding:13px 20px;border-bottom:1px solid var(--line);vertical-align:top}
-  table.cmp thead th{
-    font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
-    border-bottom:1px solid var(--ink);padding-bottom:11px;
-  }
+  table.cmp thead th{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--ink);padding-bottom:11px}
   table.cmp thead th.j{color:var(--accent)}
   table.cmp tbody th{font-weight:650;color:var(--ink);width:22%}
   table.cmp td{color:var(--ink-2);width:39%}
   table.cmp td.j{background:var(--accent-soft);color:var(--ink);font-weight:500}
   table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:0}
 
-  /* ── notes ──────────────────────────────── */
   .notes{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
   .note{padding:22px 24px;background:var(--fill);border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:5px}
   .note h4{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
@@ -122,22 +107,24 @@
 
   <header>
     <div class="eyebrow">Model Overview · Internal Reference</div>
-    <h1>typesafe/jev-1.13 <span class="slug">— Decision Model</span></h1>
+    <h1>Jev 1.13 <span class="slug">— TypeSafe AI System One model</span></h1>
     <p class="lede">
-      A <b>System One decision model</b> from TypeSafe AI, served via DefAPI. It reads language as a large
-      language model does, but does not generate text. It emits a typed decision, a probability, and a
-      confidence value. Output token consumption is zero.
+      <b>Jev</b> is a decision model built and owned by <b>TypeSafe AI</b>, and it is the first model in
+      their <b>System One</b> class. It reads language as a large language model does, but it does not
+      generate text. It emits typed answers with calibrated probabilities and confidence values that
+      software acts on directly. Generation of prose is given up in exchange for structured,
+      type-safe, low-latency decisions.
     </p>
 
     <div class="facts">
-      <div><span>Architecture</span><strong>System One</strong></div>
-      <div><span>Developer</span><strong>TypeSafe AI</strong></div>
-      <div><span>Release date</span><strong>15 Sep 2026 · Active</strong></div>
-      <div><span>Context window</span><strong>64,000 tokens</strong></div>
+      <div><span>Owner</span><strong>TypeSafe AI</strong></div>
+      <div><span>Model class</span><strong>System One</strong></div>
+      <div><span>Current release</span><strong>Jev 1.13.0 · 15 Sep 2026</strong></div>
+      <div><span>Aliases</span><strong>jev-latest · jev-preview</strong></div>
+      <div><span>First-party endpoint</span><strong>api.typesafe.ai</strong></div>
       <div><span>Input</span><strong>Text or JSON</strong></div>
-      <div><span>Output</span><strong>JSON decision object</strong></div>
-      <div><span>Input price</span><strong>$0.084 / 1M tokens</strong></div>
-      <div><span>Output price</span><strong>$0.000 / 1M tokens</strong></div>
+      <div><span>Output</span><strong>Structured JSON answers</strong></div>
+      <div><span>Output cost</span><strong>Free — not billed</strong></div>
     </div>
   </header>
 
@@ -147,19 +134,21 @@
       <div class="num">01 — Overview</div>
       <h2>Reads, classifies, does not write</h2>
       <p class="sub">
-        Conventional models are optimised to produce text. Jev is optimised to produce a decision that
-        downstream code can act on deterministically.
+        The name follows Kahneman's System 1 — fast, single-glance judgement, as distinct from the
+        step-by-step deliberation of a language model. TypeSafe trained Jev with a method they call
+        <b>RLCD</b> (Reinforcement Learning for Calibrated Decisions), tuning its probabilities against
+        real observed outcomes rather than plausibility of phrasing.
       </p>
     </div>
     <ul class="pts">
       <li><b>Reads unstructured language.</b> Free text or JSON as state — tickets, logs, plans, transcripts.</li>
-      <li><b>No generated text.</b> No assistant message, explanation, summary, or code. Output tokens are zero.</li>
-      <li><b>Classifies rather than generates.</b> Every response is a fixed shape: a probability, a pick, a rating.</li>
-      <li><b>Self-reported confidence.</b> An explicit value, plus the full distribution across options or levels.</li>
+      <li><b>No generated text.</b> No assistant message, explanation, summary, or code. String generation is absent by design.</li>
+      <li><b>Cannot hallucinate structure.</b> Possible outputs and their shape are defined in advance, so type errors are impossible.</li>
+      <li><b>Calibrated probabilities.</b> Answers carry probabilities tuned against outcomes, not impressions of fluency.</li>
       <li><b>Closed type system.</b> Three primitives only. The output form cannot drift between calls.</li>
-      <li><b>Batched evaluation.</b> A block of typed questions resolves in one request, not one request each.</li>
-      <li><b>Caller-defined criteria.</b> Branches, options, or scale levels constrain the decision space explicitly.</li>
-      <li><b>No format engineering.</b> Prompt or schema tuning is not applicable; structure is guaranteed.</li>
+      <li><b>Parallel evaluation.</b> Every question resolves in one round trip against the same state, so adding questions barely moves latency.</li>
+      <li><b>No sampling knobs.</b> There is no temperature or top_p; generic sampling settings are ignored.</li>
+      <li><b>Fast by design.</b> TypeSafe reports end-to-end latency in the tens to hundreds of milliseconds, far below comparable LLM decisions.</li>
     </ul>
   </section>
 
@@ -169,44 +158,46 @@
       <div class="num">02 — Decision primitives</div>
       <h2>Noul, choice, score</h2>
       <p class="sub">
-        Three question types. Selection depends solely on the shape of the decision. This is the complete
-        query surface of the model.
+        Three question types, each sharing <b>type</b> and <b>instructions</b> and each adding its own
+        <b>criteria</b> shape. This is the complete query surface.
       </p>
     </div>
     <div class="blocks">
       <div class="blk">
         <h3>Noul</h3>
-        <div class="sig">Boolean · probability 0–1</div>
-        <p>A yes/no enquiry returning the probability that the answer is <b>true</b>. Optional criteria describe each branch, anchoring the evaluation to domain conditions.</p>
+        <div class="sig">Boolean · probability 0–1 · no criteria</div>
+        <p>A statement judged for truth, returning a calibrated 0-to-1 probability that it is yes. Optional true/false descriptions are available. Intended for gates and guardrails.</p>
         <pre>{
-  <span class="k">"deploy_risk"</span>: {
+  <span class="k">"is_urgent"</span>: {
     <span class="k">"type"</span>: <span class="n">"noul"</span>,
-    <span class="n">0.55</span>
-  }
+    <span class="k">"instructions"</span>: <span class="n">"Is this urgent?"</span> },
+  <span class="k">"→ noul"</span>: <span class="n">0.29</span>
 }</pre>
       </div>
       <div class="blk">
         <h3>Choice</h3>
-        <div class="sig">Single selection · up to 255 options</div>
-        <p>Options are enumerated with a description each. Returns the <b>selected key</b>, the <b>distribution</b>, and <b>confidence</b>. Intended for triage and routing.</p>
+        <div class="sig">Single selection · up to 255 labelled options</div>
+        <p>Options are supplied as a map of option name to description. Returns the <b>selected key</b>, a <b>probability per option</b>, and a <b>confidence</b>. For routing, triage, and tagging.</p>
         <pre>{
-  <span class="k">"choice"</span>: <span class="n">"payments"</span>,
-  <span class="k">"probabilities"</span>: {
-    <span class="n">"payments"</span>: <span class="n">.84</span>,
-    <span class="n">"frontend"</span>: <span class="n">.16</span> },
-  <span class="k">"confidence"</span>: <span class="n">.75</span>
+  <span class="k">"queue"</span>: {
+    <span class="k">"type"</span>: <span class="n">"choice"</span>,
+    <span class="k">"criteria"</span>: { <span class="n">"billing"</span>: <span class="n">"…"</span>,
+                    <span class="n">"bug"</span>: <span class="n">"…"</span> } },
+  <span class="k">"→ choice"</span>: <span class="n">"billing"</span>,
+  <span class="k">"  confidence"</span>: <span class="n">1.0</span>
 }</pre>
       </div>
       <div class="blk">
         <h3>Score</h3>
-        <div class="sig">Ordinal rating · 2–10 ordered levels</div>
-        <p>Rating against ordered levels. Returns a <b>weighted ordinal value</b> — for example 1.99 on a scale of 0 to 2 — with the <b>legend</b>, <b>distribution</b>, and <b>confidence</b>.</p>
+        <div class="sig">Ordinal rating · 2–10 ordered level descriptions</div>
+        <p>Levels are supplied as an ordered array, low to high. Returns a possibly fractional <b>score</b>, a <b>legend</b> echoing the levels, <b>probabilities</b> per level, and a <b>confidence</b>. For severity and lead scoring.</p>
         <pre>{
-  <span class="k">"score"</span>: <span class="n">1.99</span>,
-  <span class="k">"probabilities"</span>: {
-    <span class="n">"2"</span>: <span class="n">.99</span>,
-    <span class="n">"1"</span>: <span class="n">.01</span> },
-  <span class="k">"confidence"</span>: <span class="n">.99</span>
+  <span class="k">"urgency"</span>: {
+    <span class="k">"type"</span>: <span class="n">"score"</span>,
+    <span class="k">"criteria"</span>: [<span class="n">"routine"</span>, <span class="n">"today"</span>,
+                       <span class="n">"urgent"</span>, <span class="n">"critical"</span>] },
+  <span class="k">"→ score"</span>: <span class="n">3.0</span>,
+  <span class="k">"  confidence"</span>: <span class="n">1.0</span>
 }</pre>
       </div>
     </div>
@@ -215,27 +206,32 @@
   <!-- ══ 3 ═══════════════════════════════════ -->
   <section>
     <div class="sechead">
-      <div class="num">03 — Request lifecycle</div>
-      <h2>Four stages, no generation stage</h2>
+      <div class="num">03 — Access</div>
+      <h2>First-party API, then gateways</h2>
+      <p class="sub">
+        Jev is TypeSafe AI's own model. The canonical integration is TypeSafe's own endpoint, using
+        TypeSafe's own SDKs. Aggregators resell access to the same upstream model; they are not the
+        model itself, and their pricing is their own.
+      </p>
     </div>
-    <div class="steps">
-      <div class="step">
-        <h4>State supplied</h4>
-        <p>A plain string, or a JSON object or array of context.</p>
-      </div>
-      <div class="step">
-        <h4>Questions declared</h4>
-        <p>Typed questions with noul, choice, or score and their criteria.</p>
-      </div>
-      <div class="step">
-        <h4>Decision resolved</h4>
-        <p>State evaluated against every question in the request.</p>
-      </div>
-      <div class="step">
-        <h4>Result returned</h4>
-        <p>JSON answers with probability and confidence per question.</p>
-      </div>
-    </div>
+    <table class="cmp">
+      <thead>
+        <tr><th>Route</th><th>Endpoint</th><th class="j">Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>TypeSafe — first party</th><td>api.typesafe.ai/v1/systemone</td><td class="j">Canonical. Keys via console.typesafe.ai. List price ≈ $0.042 / 1M input, output free.</td></tr>
+        <tr><th>TypeSafe SDKs</th><td>typesafe-sdk (Python 3.10+)<br>@typesafe-ai/sdk (Node 20+)</td><td class="j">Own retries with backoff, typed constructors, shared across both languages.</td></tr>
+        <tr><th>Pydantic AI</th><td>TypeSafeModel / SystemOneModel</td><td class="j">Native class; decision models are drop-in replaceable for agents.</td></tr>
+        <tr><th>Third-party gateways</th><td>OpenRouter, DefAPI, Opper, APIMODELS, others</td><td class="j">Same upstream model, normalised requests. Higher rates — gateway markup, not TypeSafe pricing.</td></tr>
+        <tr><th>Self-hosted</th><td>Ollama and compatible runtimes</td><td class="j">The System One API shape is portable to local decision models.</td></tr>
+      </tbody>
+    </table>
+    <ul class="pts" style="margin-top:30px">
+      <li><b>Request shape is fixed.</b> Three fields: <b>state</b>, <b>questions</b>, and <b>model</b>. An OpenAI-compatible chat client will not work here.</li>
+      <li><b>Pin the version in production.</b> Aliases move on release. Use <b>jev-1.13.0</b> once thresholds are tuned against a specific release.</li>
+      <li><b>Two input budgets apply.</b> 64k tokens for state plus all questions combined; 32k for state plus the single longest question.</li>
+      <li><b>Rate limits on 1.13</b> are reported as 250,000 tokens per second and 1,200 requests per minute, subject to change. Handle 429 with retry-after.</li>
+    </ul>
   </section>
 
   <!-- ══ 4 ═══════════════════════════════════ -->
@@ -247,45 +243,51 @@
     </div>
     <table class="cmp">
       <thead>
-        <tr><th>Attribute</th><th>Standard LLM</th><th class="j">typesafe/jev-1.13</th></tr>
+        <tr><th>Attribute</th><th>Standard LLM</th><th class="j">Jev 1.13</th></tr>
       </thead>
       <tbody>
         <tr><th>Primary function</th><td>Text generation</td><td class="j">Decision resolution</td></tr>
         <tr><th>Output form</th><td>Unconstrained prose, code, or markup</td><td class="j">Fixed JSON schema on every call</td></tr>
-        <tr><th>Output tokens</th><td>Variable, billed per token</td><td class="j">Zero; nothing is generated</td></tr>
-        <tr><th>Confidence</th><td>Not supplied; inferred by the caller</td><td class="j">Explicit value plus full distribution</td></tr>
-        <tr><th>Consistency</th><td>Varies with wording and sampling</td><td class="j">Schema and type invariants preserved</td></tr>
-        <tr><th>Parsing risk</th><td>Malformed JSON or narrative contamination</td><td class="j">Eliminated by type enforcement</td></tr>
-        <tr><th>Applicable tasks</th><td>Drafting, explanation, synthesis, coding, dialogue</td><td class="j">Routing, triage, scoring, automated gating</td></tr>
-        <tr><th>Cost driver</th><td>Input and output volume</td><td class="j">Input volume only</td></tr>
+        <tr><th>Output cost</th><td>Billed per generated token</td><td class="j">Free; no string generation occurs</td></tr>
+        <tr><th>Malformed output</th><td>Possible; requires defensive parsing</td><td class="j">Impossible by construction</td></tr>
+        <tr><th>Confidence</th><td>Not supplied; inferred by the caller</td><td class="j">Calibrated value plus full distribution</td></tr>
+        <tr><th>Latency</th><td>Seconds; grows with output length</td><td class="j">Tens to hundreds of milliseconds</td></tr>
+        <tr><th>Batch cost</th><td>Rises with each additional question</td><td class="j">Flat; questions evaluate in parallel</td></tr>
+        <tr><th>Applicable tasks</th><td>Drafting, explanation, synthesis, coding, dialogue</td><td class="j">Routing, triage, scoring, moderation, gating</td></tr>
       </tbody>
     </table>
+    <ul class="pts" style="margin-top:30px">
+      <li><b>Use an LLM</b> where the output is linguistic: an explanation, a draft, a revision, a reply.</li>
+      <li><b>Use Jev</b> where the output is a branch: an escalation, a queue, a recorded label, a permission decision.</li>
+      <li><b>Combine both</b> where classification and prose are both required. A documented pattern is a verified cascade: Jev gates cheaply, the LLM runs only on the accepted path.</li>
+    </ul>
   </section>
 
   <!-- ══ 5 ═══════════════════════════════════ -->
   <section>
     <div class="sechead">
       <div class="num">05 — Operational notes</div>
-      <h2>Cost behaviour and confidence handling</h2>
+      <h2>Cost, confidence, and known limits</h2>
     </div>
     <div class="notes">
       <div class="note">
         <h4>Cost</h4>
-        <p>With output tokens at zero, cost is a function of input alone. The levers are <b>minimising supplied state</b> and <b>precision of criteria</b>. Batching reduces overhead further.</p>
+        <p>Output is not billed, so cost is a function of input alone. Levers are <b>trimming state to what the decision needs</b> and <b>precision of criteria</b>. Batching keeps marginal cost per question near zero.</p>
       </div>
       <div class="note">
         <h4>Confidence</h4>
-        <p>Define a <b>threshold per question type</b> and branch on it. A low-confidence result is a deterministic signal to escalate or defer, not a decision to act upon.</p>
+        <p>Define a <b>threshold per question type</b> and branch on it. A low-confidence result is a deterministic signal to escalate or hand to a fallback model, not a decision to act on.</p>
       </div>
       <div class="note">
-        <h4>Integration</h4>
-        <p>Clients may be written against a fixed contract and validated without defensive parsing. Distributions permit secondary routing without a second call.</p>
+        <h4>Limits</h4>
+        <p>Jev is a sampled model. Answers can shift with phrasing, negation, and adversarial content, so it is <b>not replayable</b> for verification. Log model version, latency, and outcome, but avoid logging full state or keys.</p>
       </div>
     </div>
   </section>
 
   <footer>
-    <b>typesafe/jev-1.13</b> — System One decision model · TypeSafe AI, served via DefAPI · Primitives: noul, choice, score
+    <b>Jev 1.13.0</b> — System One decision model by TypeSafe AI · Primitives: noul, choice, score ·
+    Model id <b>jev-1.13.0</b>, aliases jev-latest and jev-preview
   </footer>
 
 </div>
