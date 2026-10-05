@@ -45,6 +45,9 @@
   ul.pts li{position:relative;padding-left:24px;color:var(--ink-2);font-size:16.5px}
   ul.pts li::before{content:"";position:absolute;left:2px;top:10px;width:6px;height:6px;background:var(--accent);border-radius:50%}
   ul.pts li b{color:var(--ink);font-weight:650}
+  ul.pts.one{grid-template-columns:1fr;gap:8px;margin-top:16px}
+  ul.pts.one li{font-size:14.5px;line-height:1.55;padding-left:20px}
+  ul.pts.one li::before{top:8px;width:5px;height:5px}
 
   .blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
   .blk h3{font-size:21px;font-weight:700;letter-spacing:-.018em}
@@ -192,6 +195,54 @@
         <tr><th>Suited to</th><td>Drafting, explanation, coding, dialogue</td><td class="j">Routing, triage, scoring, gating, moderation</td></tr>
       </tbody>
     </table>
+  </section>
+
+  <!-- ══ 4 ═══════════════════════════════════ -->
+  <section>
+    <div class="sechead">
+      <div class="num">04 — Use cases</div>
+      <h2>Candidate applications</h2>
+      <p class="sub">Candidate applications, presented for assessment. None has been validated against these scenarios.</p>
+    </div>
+    <div class="blocks">
+      <div class="blk">
+        <h3>Confidence-gated retrieval</h3>
+        <div class="sig">noul × 4</div>
+        <p>Search ranks by wording similarity, so a retrieved passage may match the query yet be irrelevant, contradictory, or carry instructions aimed at the model. Each passage is checked before it reaches the writing model; failures are dropped.</p>
+        <ul class="pts one">
+          <li>Four binary questions per passage: relevant, contains usable evidence, contradicts the query's premise, attempts to instruct the model</li>
+          <li>Thresholds apply in fixed order — security, conflict, relevance — and the first match decides</li>
+          <li>Contradicting passages go to a separate prompt block, so the writer can flag the conflict</li>
+          <li>Re-tuning is a number change against stored answers, with no further calls</li>
+          <li>A filter, not a security boundary — the writing prompt still treats every passage as untrusted</li>
+        </ul>
+      </div>
+      <div class="blk">
+        <h3>Classification across a taxonomy</h3>
+        <div class="sig">choice × 1</div>
+        <p>Sorting is bottlenecked by ambiguous cases, which look identical to clear ones. The answer's confidence separates the two.</p>
+        <ul class="pts one">
+          <li>One choice over the full taxonomy, reliable to roughly 240 options</li>
+          <li>The decision reads confidence, not the winning option's probability — a narrow lead and a scattered distribution are different situations at the same probability</li>
+          <li>Below the threshold, the parent category is reported, derived in code with no second request</li>
+          <li>Below that, the item goes to human review</li>
+          <li>In TypeSafe's published example, confidence-driven fallback raised correct labels from 39 to 48 across 60 filings</li>
+        </ul>
+      </div>
+      <div class="blk">
+        <h3>Historic-record attribution</h3>
+        <div class="sig">noul × N · advisory only</div>
+        <p>An editor checks whether a name in current coverage appears in earlier reporting on a similar offence. A string match cannot separate a genuine prior record from a namesake.</p>
+        <ul class="pts one">
+          <li>The state carries the two records being compared, not a full archive</li>
+          <li>Each identity assertion is a separate noul: surname, locality, vehicle or role, event-type consistency</li>
+          <li>All must clear threshold before a link is recorded; one failure routes to review</li>
+          <li>Probabilities are retained so a reviewer sees near-misses, not a bare rejection</li>
+          <li>Advisory only — it annotates a draft and never publishes. Low confidence does not mean no prior record exists</li>
+          <li>Thresholds are fitted per archive and are not transferable from the case above</li>
+        </ul>
+      </div>
+    </div>
   </section>
 
   <footer>
