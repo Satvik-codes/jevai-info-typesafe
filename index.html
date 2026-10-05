@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>typesafe/jev-1.13 — Technical Overview</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#14181f;
+    --ink-2:#3c4451;
+    --ink-3:#727a88;
+    --line:#e4e7ee;
+    --fill:#f7f8fa;
+    --accent:#1c3c6e;
+    --accent-soft:#eef3fa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Inter","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.66;-webkit-font-smoothing:antialiased;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .wrap{width:90%;max-width:1300px;margin:0 auto}
+
+  /* ── header ─────────────────────────────── */
+  header{padding:44px 0 34px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+  h1{margin:14px 0 0;font-size:clamp(34px,3.6vw,50px);line-height:1.06;font-weight:700;letter-spacing:-.03em}
+  h1 .slug{color:var(--ink-3);font-weight:400}
+  .lede{margin:20px 0 0;max-width:74ch;font-size:18.5px;color:var(--ink-2);font-weight:350}
+  .lede b{font-weight:600;color:var(--ink)}
+
+  .facts{margin-top:34px;display:grid;grid-template-columns:repeat(4,1fr);gap:22px 34px}
+  .facts div span{
+    display:block;font-size:11.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+  }
+  .facts div strong{display:block;font-weight:600;font-size:16.5px;margin-top:4px;letter-spacing:-.01em}
+
+  /* ── sections ───────────────────────────── */
+  section{padding:34px 0;border-top:1px solid var(--line)}
+  .sechead{margin-bottom:26px}
+  .num{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3)}
+  h2{margin-top:8px;font-size:27px;font-weight:700;letter-spacing:-.022em;line-height:1.18;max-width:30ch}
+  .sub{margin-top:11px;color:var(--ink-2);max-width:82ch;font-size:17px}
+
+  /* ── bullets: 2 columns, airy ───────────── */
+  ul.pts{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:16px 46px}
+  ul.pts li{position:relative;padding-left:24px;color:var(--ink-2);font-size:16.5px}
+  ul.pts li::before{content:"";position:absolute;left:2px;top:10px;width:6px;height:6px;background:var(--accent);border-radius:50%}
+  ul.pts li b{color:var(--ink);font-weight:650}
+
+  /* ── primitives ─────────────────────────── */
+  .blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .blk h3{font-size:22px;font-weight:700;letter-spacing:-.018em}
+  .blk .sig{margin-top:5px;font-size:14px;color:var(--ink-3)}
+  .blk p{margin-top:15px;color:var(--ink-2);font-size:16px}
+  .blk p b{color:var(--ink);font-weight:600}
+  pre{
+    margin-top:17px;background:var(--fill);border:1px solid var(--line);border-left:2px solid var(--accent);
+    border-radius:4px;padding:14px 16px;overflow-x:auto;
+    font-family:"Cascadia Mono","JetBrains Mono",Consolas,"Courier New",monospace;
+    font-size:13.5px;line-height:1.68;color:var(--ink-2);
+  }
+  pre .k{color:var(--accent);font-weight:600}
+  pre .n{color:var(--ink);font-weight:600}
+
+  /* ── lifecycle ──────────────────────────── */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;counter-reset:s}
+  .step{counter-increment:s}
+  .step::before{
+    content:"0" counter(s);display:block;font-size:13px;font-weight:700;color:var(--accent);
+    letter-spacing:.06em;font-variant-numeric:tabular-nums;
+  }
+  .step h4{margin-top:7px;font-size:17.5px;font-weight:650;letter-spacing:-.012em}
+  .step p{margin-top:6px;color:var(--ink-2);font-size:15.5px}
+
+  /* ── comparison ─────────────────────────── */
+  table.cmp{width:100%;border-collapse:collapse;font-size:16.5px;table-layout:fixed}
+  table.cmp th,table.cmp td{text-align:left;padding:13px 20px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cmp thead th{
+    font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+    border-bottom:1px solid var(--ink);padding-bottom:11px;
+  }
+  table.cmp thead th.j{color:var(--accent)}
+  table.cmp tbody th{font-weight:650;color:var(--ink);width:22%}
+  table.cmp td{color:var(--ink-2);width:39%}
+  table.cmp td.j{background:var(--accent-soft);color:var(--ink);font-weight:500}
+  table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:0}
+
+  /* ── notes ──────────────────────────────── */
+  .notes{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .note{padding:22px 24px;background:var(--fill);border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:5px}
+  .note h4{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+  .note p{margin-top:11px;color:var(--ink-2);font-size:15.5px}
+  .note p b{color:var(--ink);font-weight:600}
+
+  footer{margin-top:8px;padding:28px 0 44px;border-top:1px solid var(--line);color:var(--ink-3);font-size:14.5px}
+  footer b{color:var(--ink-2);font-weight:600}
+
+  @media(max-width:1040px){
+    .blocks,.notes,.steps,ul.pts{grid-template-columns:1fr 1fr}
+    .facts{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:680px){
+    .blocks,.notes,.steps,ul.pts,.facts{grid-template-columns:1fr}
+    table.cmp thead{display:none}
+    table.cmp tbody th,table.cmp td{width:auto;display:block;padding:5px 0}
+    table.cmp td.j{border-left:2px solid var(--accent);padding-left:14px;margin-bottom:12px}
+  }
+  @media print{
+    .wrap{width:100%;max-width:none}
+    section{page-break-inside:avoid}
+    body{font-size:11pt}
+    header{padding-top:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Model Overview · Internal Reference</div>
+    <h1>typesafe/jev-1.13 <span class="slug">— Decision Model</span></h1>
+    <p class="lede">
+      A <b>System One decision model</b> from TypeSafe AI, served via DefAPI. It reads language as a large
+      language model does, but does not generate text. It emits a typed decision, a probability, and a
+      confidence value. Output token consumption is zero.
+    </p>
+
+    <div class="facts">
+      <div><span>Architecture</span><strong>System One</strong></div>
+      <div><span>Developer</span><strong>TypeSafe AI</strong></div>
+      <div><span>Release date</span><strong>15 Sep 2026 · Active</strong></div>
+      <div><span>Context window</span><strong>64,000 tokens</strong></div>
+      <div><span>Input</span><strong>Text or JSON</strong></div>
+      <div><span>Output</span><strong>JSON decision object</strong></div>
+      <div><span>Input price</span><strong>$0.084 / 1M tokens</strong></div>
+      <div><span>Output price</span><strong>$0.000 / 1M tokens</strong></div>
+    </div>
+  </header>
+
+  <!-- ══ 1 ═══════════════════════════════════ -->
+  <section>
+    <div class="sechead">
+      <div class="num">01 — Overview</div>
+      <h2>Reads, classifies, does not write</h2>
+      <p class="sub">
+        Conventional models are optimised to produce text. Jev is optimised to produce a decision that
+        downstream code can act on deterministically.
+      </p>
+    </div>
+    <ul class="pts">
+      <li><b>Reads unstructured language.</b> Free text or JSON as state — tickets, logs, plans, transcripts.</li>
+      <li><b>No generated text.</b> No assistant message, explanation, summary, or code. Output tokens are zero.</li>
+      <li><b>Classifies rather than generates.</b> Every response is a fixed shape: a probability, a pick, a rating.</li>
+      <li><b>Self-reported confidence.</b> An explicit value, plus the full distribution across options or levels.</li>
+      <li><b>Closed type system.</b> Three primitives only. The output form cannot drift between calls.</li>
+      <li><b>Batched evaluation.</b> A block of typed questions resolves in one request, not one request each.</li>
+      <li><b>Caller-defined criteria.</b> Branches, options, or scale levels constrain the decision space explicitly.</li>
+      <li><b>No format engineering.</b> Prompt or schema tuning is not applicable; structure is guaranteed.</li>
+    </ul>
+  </section>
+
+  <!-- ══ 2 ═══════════════════════════════════ -->
+  <section>
+    <div class="sechead">
+      <div class="num">02 — Decision primitives</div>
+      <h2>Noul, choice, score</h2>
+      <p class="sub">
+        Three question types. Selection depends solely on the shape of the decision. This is the complete
+        query surface of the model.
+      </p>
+    </div>
+    <div class="blocks">
+      <div class="blk">
+        <h3>Noul</h3>
+        <div class="sig">Boolean · probability 0–1</div>
+        <p>A yes/no enquiry returning the probability that the answer is <b>true</b>. Optional criteria describe each branch, anchoring the evaluation to domain conditions.</p>
+        <pre>{
+  <span class="k">"deploy_risk"</span>: {
+    <span class="k">"type"</span>: <span class="n">"noul"</span>,
+    <span class="n">0.55</span>
+  }
+}</pre>
+      </div>
+      <div class="blk">
+        <h3>Choice</h3>
+        <div class="sig">Single selection · up to 255 options</div>
+        <p>Options are enumerated with a description each. Returns the <b>selected key</b>, the <b>distribution</b>, and <b>confidence</b>. Intended for triage and routing.</p>
+        <pre>{
+  <span class="k">"choice"</span>: <span class="n">"payments"</span>,
+  <span class="k">"probabilities"</span>: {
+    <span class="n">"payments"</span>: <span class="n">.84</span>,
+    <span class="n">"frontend"</span>: <span class="n">.16</span> },
+  <span class="k">"confidence"</span>: <span class="n">.75</span>
+}</pre>
+      </div>
+      <div class="blk">
+        <h3>Score</h3>
+        <div class="sig">Ordinal rating · 2–10 ordered levels</div>
+        <p>Rating against ordered levels. Returns a <b>weighted ordinal value</b> — for example 1.99 on a scale of 0 to 2 — with the <b>legend</b>, <b>distribution</b>, and <b>confidence</b>.</p>
+        <pre>{
+  <span class="k">"score"</span>: <span class="n">1.99</span>,
+  <span class="k">"probabilities"</span>: {
+    <span class="n">"2"</span>: <span class="n">.99</span>,
+    <span class="n">"1"</span>: <span class="n">.01</span> },
+  <span class="k">"confidence"</span>: <span class="n">.99</span>
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 3 ═══════════════════════════════════ -->
+  <section>
+    <div class="sechead">
+      <div class="num">03 — Request lifecycle</div>
+      <h2>Four stages, no generation stage</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h4>State supplied</h4>
+        <p>A plain string, or a JSON object or array of context.</p>
+      </div>
+      <div class="step">
+        <h4>Questions declared</h4>
+        <p>Typed questions with noul, choice, or score and their criteria.</p>
+      </div>
+      <div class="step">
+        <h4>Decision resolved</h4>
+        <p>State evaluated against every question in the request.</p>
+      </div>
+      <div class="step">
+        <h4>Result returned</h4>
+        <p>JSON answers with probability and confidence per question.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 4 ═══════════════════════════════════ -->
+  <section>
+    <div class="sechead">
+      <div class="num">04 — Comparative analysis</div>
+      <h2>Against a standard language model</h2>
+      <p class="sub">Comparable reading comprehension, dissimilar output contract.</p>
+    </div>
+    <table class="cmp">
+      <thead>
+        <tr><th>Attribute</th><th>Standard LLM</th><th class="j">typesafe/jev-1.13</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>Primary function</th><td>Text generation</td><td class="j">Decision resolution</td></tr>
+        <tr><th>Output form</th><td>Unconstrained prose, code, or markup</td><td class="j">Fixed JSON schema on every call</td></tr>
+        <tr><th>Output tokens</th><td>Variable, billed per token</td><td class="j">Zero; nothing is generated</td></tr>
+        <tr><th>Confidence</th><td>Not supplied; inferred by the caller</td><td class="j">Explicit value plus full distribution</td></tr>
+        <tr><th>Consistency</th><td>Varies with wording and sampling</td><td class="j">Schema and type invariants preserved</td></tr>
+        <tr><th>Parsing risk</th><td>Malformed JSON or narrative contamination</td><td class="j">Eliminated by type enforcement</td></tr>
+        <tr><th>Applicable tasks</th><td>Drafting, explanation, synthesis, coding, dialogue</td><td class="j">Routing, triage, scoring, automated gating</td></tr>
+        <tr><th>Cost driver</th><td>Input and output volume</td><td class="j">Input volume only</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══ 5 ═══════════════════════════════════ -->
+  <section>
+    <div class="sechead">
+      <div class="num">05 — Operational notes</div>
+      <h2>Cost behaviour and confidence handling</h2>
+    </div>
+    <div class="notes">
+      <div class="note">
+        <h4>Cost</h4>
+        <p>With output tokens at zero, cost is a function of input alone. The levers are <b>minimising supplied state</b> and <b>precision of criteria</b>. Batching reduces overhead further.</p>
+      </div>
+      <div class="note">
+        <h4>Confidence</h4>
+        <p>Define a <b>threshold per question type</b> and branch on it. A low-confidence result is a deterministic signal to escalate or defer, not a decision to act upon.</p>
+      </div>
+      <div class="note">
+        <h4>Integration</h4>
+        <p>Clients may be written against a fixed contract and validated without defensive parsing. Distributions permit secondary routing without a second call.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <b>typesafe/jev-1.13</b> — System One decision model · TypeSafe AI, served via DefAPI · Primitives: noul, choice, score
+  </footer>
+
+</div>
+</body>
+</html>
