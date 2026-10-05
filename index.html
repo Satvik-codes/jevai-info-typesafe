@@ -69,21 +69,15 @@
   table.cmp td.j{background:var(--accent-soft);color:var(--ink);font-weight:500}
   table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:0}
 
-  .notes{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
-  .note{padding:20px 22px;background:var(--fill);border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:5px}
-  .note h4{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
-  .note p{margin-top:10px;color:var(--ink-2);font-size:15.5px}
-  .note p b{color:var(--ink);font-weight:600}
-
   footer{margin-top:8px;padding:26px 0 44px;border-top:1px solid var(--line);color:var(--ink-3);font-size:14.5px}
   footer b{color:var(--ink-2);font-weight:600}
 
   @media(max-width:1040px){
-    .blocks,.notes,ul.pts{grid-template-columns:1fr 1fr}
+    .blocks,ul.pts{grid-template-columns:1fr 1fr}
     .facts{grid-template-columns:repeat(2,1fr)}
   }
   @media(max-width:680px){
-    .blocks,.notes,ul.pts,.facts{grid-template-columns:1fr}
+    .blocks,ul.pts,.facts{grid-template-columns:1fr}
     table.cmp thead{display:none}
     table.cmp tbody th,table.cmp td{width:auto;display:block;padding:4px 0}
     table.cmp td.j{border-left:2px solid var(--accent);padding-left:14px;margin-bottom:12px}
@@ -177,50 +171,10 @@
     </div>
   </section>
 
-  <!-- ══ 2b ══════════════════════════════════ -->
-  <section>
-    <div class="sechead">
-      <div class="num">03 — Request</div>
-      <h2>Three fields, one round trip</h2>
-    </div>
-    <table class="cmp">
-      <thead>
-        <tr><th>Field</th><th>Value</th><th class="j">Notes</th></tr>
-      </thead>
-      <tbody>
-        <tr><th>state</th><td>string, object, or array</td><td class="j">The context to judge. Trim to what the decision needs.</td></tr>
-        <tr><th>questions</th><td>map of named questions</td><td class="j">All evaluated in parallel. Keys are yours and are not sent to the model.</td></tr>
-        <tr><th>model</th><td>jev-1.13.0</td><td class="j">Pin the version in production. Aliases jev-latest and jev-preview move on release.</td></tr>
-        <tr><th>Limits</th><td>64k combined · 32k single question</td><td class="j">Exceeding either returns max_tokens_exceeded rather than truncating.</td></tr>
-        <tr><th>Rate limit</th><td>250k tokens/s · 1,200 req/min</td><td class="j">Subject to change. Handle 429 with retry-after.</td></tr>
-      </tbody>
-    </table>
-  </section>
-
   <!-- ══ 3 ═══════════════════════════════════ -->
   <section>
     <div class="sechead">
-      <div class="num">04 — Access</div>
-      <h2>First-party, then gateways</h2>
-    </div>
-    <table class="cmp">
-      <thead>
-        <tr><th>Route</th><th>Endpoint</th><th class="j">Notes</th></tr>
-      </thead>
-      <tbody>
-        <tr><th>TypeSafe</th><td>api.typesafe.ai/v1/systemone</td><td class="j">Canonical. ~$0.042 per 1M input tokens, output free.</td></tr>
-        <tr><th>TypeSafe SDKs</th><td>typesafe-sdk · @typesafe-ai/sdk</td><td class="j">Python 3.10+ and Node 20+. Retries and typed constructors included.</td></tr>
-        <tr><th>Pydantic AI</th><td>TypeSafeModel</td><td class="j">Decision models are drop-in replaceable within an agent.</td></tr>
-        <tr><th>Gateways</th><td>OpenRouter · DefAPI · Opper</td><td class="j">Same upstream model, higher rates. Markup, not TypeSafe pricing.</td></tr>
-        <tr><th>Self-hosted</th><td>Ollama and compatible runtimes</td><td class="j">The System One request shape is portable to local models.</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ══ 4 ═══════════════════════════════════ -->
-  <section>
-    <div class="sechead">
-      <div class="num">05 — Comparison</div>
+      <div class="num">03 — Comparison</div>
       <h2>Against a standard language model</h2>
     </div>
     <table class="cmp">
@@ -238,28 +192,6 @@
         <tr><th>Suited to</th><td>Drafting, explanation, coding, dialogue</td><td class="j">Routing, triage, scoring, gating, moderation</td></tr>
       </tbody>
     </table>
-  </section>
-
-  <!-- ══ 5 ═══════════════════════════════════ -->
-  <section>
-    <div class="sechead">
-      <div class="num">06 — Notes</div>
-      <h2>Cost, confidence, limits</h2>
-    </div>
-    <div class="notes">
-      <div class="note">
-        <h4>Cost</h4>
-        <p>Output is free, so cost follows input alone. Trim <b>state</b> to what the decision needs and batch questions.</p>
-      </div>
-      <div class="note">
-        <h4>Confidence</h4>
-        <p>Set a <b>threshold per question type</b> and branch on it. Low confidence means escalate or fall back, not act.</p>
-      </div>
-      <div class="note">
-        <h4>Limits</h4>
-        <p>Jev is sampled. Answers shift with phrasing, so it is <b>not replayable</b> for verification. Log versions and outcomes, not state or keys.</p>
-      </div>
-    </div>
   </section>
 
   <footer>
